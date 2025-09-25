@@ -1,0 +1,10 @@
+<div class="fullscreen">
+  @for (slide of (slides() | reverse); track $index) {
+  <app-slide [slide]="slide">
+    @for (layer of (slide.layers | reverse); track $index) {
+    <app-layer [layer]="layer"></app-layer>
+    }
+  </app-slide>
+
+  }
+</div>

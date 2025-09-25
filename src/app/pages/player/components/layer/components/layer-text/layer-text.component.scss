@@ -1,0 +1,13 @@
+div.text-layer {
+  position: absolute;
+  word-break: break-word;
+  display: inline-flex;
+  overflow: visible;
+  padding: 0;
+  margin: 0;
+
+  span {
+    width: 100%;
+    display: grid;
+  }
+}

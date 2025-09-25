@@ -1,0 +1,7 @@
+<div #element>
+  @if (!isBlankSrc()) {
+  <img [setSrc]="src()" [style.objectFit]="objectFit()" [alt]="src()" />
+  } @else {
+  <app-blank [blankType]="blankType()"></app-blank>
+  }
+</div>

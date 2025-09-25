@@ -1,0 +1,23 @@
+[
+  {
+    "id": "d03fc825-7255-4fca-b02e-bb1fa4bb8b5e",
+    "duration": 5000,
+    "layers": [],
+    "properties": {
+      "backgroundColour": "#ffffff",
+      "backgroundFit": "auto",
+      "backgroundType": "transparent",
+      "duration": 5000
+    },
+    "animations": {
+      "keyframes": [
+        {
+          "property": "opacity",
+          "from": "1",
+          "to": "1"
+        }
+      ]
+    },
+    "name": "Slide 1"
+  }
+]

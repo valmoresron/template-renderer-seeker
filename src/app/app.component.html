@@ -1,0 +1,10 @@
+@if (render()) { @if (!isLoading()) { @if (!isResolutionSupported()) { @if
+(builderDataScaled()) {
+<app-player #scaled></app-player>
+} @else {
+<app-unsupported-resolution></app-unsupported-resolution>
+} } @else {
+<app-player #notScaled></app-player>
+} } @else {
+<div class="fullscreen loading-screen"></div>
+} }

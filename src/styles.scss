@@ -1,0 +1,30 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+@mixin fullscreen() {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Work Sans', sans-serif;
+}
+
+.fullscreen {
+  @include fullscreen();
+}
+
+.hw-100 {
+  width: 100%;
+  height: 100%;
+}

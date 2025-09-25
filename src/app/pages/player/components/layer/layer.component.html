@@ -1,0 +1,13 @@
+@switch (layer().type) { @case ('Circle') {
+<app-layer-circle #layerComponent></app-layer-circle>
+} @case ('Image') {
+<app-layer-image #layerComponent [layer]="castLayer(layer())"></app-layer-image>
+} @case ('Rectangle') {
+<app-layer-rectangle #layerComponent></app-layer-rectangle>
+} @case ('Text') {
+<app-layer-text #layerComponent [layer]="castLayer(layer())"></app-layer-text>
+} @case ('Triangle') {
+<app-layer-triangle #layerComponent></app-layer-triangle>
+} @case ('Video') {
+<app-layer-video #layerComponent [layer]="castLayer(layer())"></app-layer-video>
+} }

@@ -1,0 +1,17 @@
+<div
+  #slideElement
+  class="fullscreen slide"
+  [class.checkerboard]="checkerBoardBackground()"
+>
+  @if (backgroundType() === 'video') {
+  <video
+    #video
+    [setSrc]="videoSrc() ?? ''"
+    [loop]="true"
+    [muted]="true"
+    [forcePlay]="true"
+  ></video>
+  }
+
+  <ng-content></ng-content>
+</div>

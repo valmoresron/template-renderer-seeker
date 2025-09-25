@@ -1,0 +1,38 @@
+{
+  "name": "template-renderer",
+  "version": "1.0.2",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "npm run clean && npm run build:prod && npm run package:zip",
+    "package:zip": "node build-scripts/package-zip.mjs",
+    "build:prod": "ng build --configuration=production",
+    "clean": "rimraf dist",
+    "watch": "ng build --watch --configuration=development",
+    "test": "ng test"
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/common": "^20.1.0",
+    "@angular/compiler": "^20.1.0",
+    "@angular/core": "^20.1.0",
+    "@angular/forms": "^20.1.0",
+    "@angular/platform-browser": "^20.1.0",
+    "@angular/router": "^20.1.0",
+    "gsap": "^3.13.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^20.1.3",
+    "@angular/cli": "^20.1.3",
+    "@angular/compiler-cli": "^20.1.0",
+    "adm-zip": "^0.5.16",
+    "fs-extra": "^11.3.0",
+    "rimraf": "^6.0.1",
+    "typescript": "~5.8.2"
+  },
+  "volta": {
+    "node": "22.18.0"
+  }
+}

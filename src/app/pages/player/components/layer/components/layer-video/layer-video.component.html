@@ -1,0 +1,15 @@
+<div #element>
+  @if (!isBlankSrc()) {
+  <video
+    #video
+    [style.objectFit]="objectFit()"
+    [setSrc]="src()"
+    [disablePictureInPicture]="true"
+    [muted]="true"
+    [loop]="true"
+    [forcePlay]="true"
+  ></video>
+  } @else {
+  <app-blank [blankType]="blankType()"></app-blank>
+  }
+</div>
