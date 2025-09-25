@@ -5,6 +5,7 @@ import {
   effect,
   ElementRef,
   inject,
+  signal,
   viewChildren,
 } from '@angular/core';
 import { PlayerStateService } from '../../../core/services/player/player-state.service';
@@ -17,9 +18,15 @@ import { ReversePipe } from 'src/core/pipes/reverse/reverse.pipe';
 import { Slide } from 'src/core/models/renderer/slide/slide.model';
 import { LegacyService } from 'src/core/services/legacy/legacy.service';
 import { PlayerService } from 'src/core/services/player/player.service';
+import { TimelineSliderComponent } from './components/timeline-slider/timeline-slider.component';
 
 @Component({
-  imports: [SlideComponent, LayerComponent, ReversePipe],
+  imports: [
+    SlideComponent,
+    LayerComponent,
+    ReversePipe,
+    TimelineSliderComponent,
+  ],
   selector: 'app-player',
   templateUrl: './player.component.html',
   styleUrl: './player.component.scss',
@@ -43,6 +50,8 @@ export class PlayerComponent {
     const original = this.playerState.builderData();
     return scaled ?? original;
   });
+
+  readonly masterTimeline = signal<gsap.core.Timeline | null>(null);
 
   constructor() {
     const readyRef = effect(() => {
@@ -72,68 +81,89 @@ export class PlayerComponent {
       slideTimelines.push(slideTimeline);
     }
 
-    let index = 0;
-    slideTimelines.forEach((timeline, i) => {
-      timeline.eventCallback('onComplete', () => {
-        if (this.destroyRef.destroyed) return;
+    const masterTimeline = gsap.timeline({ paused: true });
+    let cumulativeDuration = 0;
+    for (const [i, slideTimeline] of slideTimelines.entries()) {
+      masterTimeline.add(slideTimeline, cumulativeDuration / 1000);
+      console.log(cumulativeDuration);
+      slideTimeline.play();
 
-        const currentIndex = index % slideTimelines.length;
-        const nextIndex = (currentIndex + 1) % slideTimelines.length;
-        index++;
+      cumulativeDuration += slides[i].properties.duration;
+    }
 
-        const last = currentIndex + 1 === slideTimelines.length;
-        const nextTimeline = slideTimelines[nextIndex];
-        const playNext = () => {
-          nextTimeline.seek(0);
-          nextTimeline.play();
-        };
+    setTimeout(() => {
+      masterTimeline.play();
+      masterTimeline.repeat(-1);
+    }, 3000);
 
-        this.legacyService.logEndSlideMessage();
-        if (last) {
-          this.legacyService.logEndTemplateMessage();
-        }
+    this.masterTimeline.set(masterTimeline);
 
-        if (last && this.legacyService.hasParentEvent()) {
-          // TODO: REMOVE THIS AFTER TEST
-          const getDelayFromLocalStorage = () => {
-            try {
-              const key = 'RENDERER_LOOP_DELAY';
-              const value = localStorage.getItem(key);
-              if (value !== null && typeof value === 'string') {
-                const valueNum = parseInt(value);
-                if (!isNaN(valueNum)) return valueNum;
-              }
-            } catch (error) {
-              // NOTE: Ignore error
-              console.log(error);
-            }
-            return 0;
-          };
+    (window as unknown as { xx: (num: number) => void }).xx = (num) => {
+      masterTimeline.seek(num);
+    };
 
-          const delayBeforeLoopMs = getDelayFromLocalStorage() || 1000;
-          setTimeout(() => {
-            playNext();
-          }, delayBeforeLoopMs);
-        } else {
-          playNext();
-        }
-      });
+    // let index = 0;
+    // slideTimelines.forEach((timeline, i) => {
+    //   timeline.eventCallback('onComplete', () => {
+    //     if (this.destroyRef.destroyed) return;
 
-      timeline.eventCallback('onStart', () => {
-        this.playerService.activeSlide.set(slides[i]);
-        if (i === 0) {
-          this.legacyService.logInitMessage(
-            Boolean(this.playerState.dataJson()),
-          );
+    //     const currentIndex = index % slideTimelines.length;
+    //     const nextIndex = (currentIndex + 1) % slideTimelines.length;
+    //     index++;
 
-          const lastSlide = slides[slides.length - 1];
-          const lastSlideElement = this.getSlideElementBySlide(lastSlide);
-          gsap.set(lastSlideElement, { display: 'none' });
-        }
-      });
-    });
+    //     const last = currentIndex + 1 === slideTimelines.length;
+    //     const nextTimeline = slideTimelines[nextIndex];
+    //     const playNext = () => {
+    //       nextTimeline.seek(0);
+    //       nextTimeline.play();
+    //     };
 
-    slideTimelines[0].play();
+    //     this.legacyService.logEndSlideMessage();
+    //     if (last) {
+    //       this.legacyService.logEndTemplateMessage();
+    //     }
+
+    //     if (last && this.legacyService.hasParentEvent()) {
+    //       // TODO: REMOVE THIS AFTER TEST
+    //       const getDelayFromLocalStorage = () => {
+    //         try {
+    //           const key = 'RENDERER_LOOP_DELAY';
+    //           const value = localStorage.getItem(key);
+    //           if (value !== null && typeof value === 'string') {
+    //             const valueNum = parseInt(value);
+    //             if (!isNaN(valueNum)) return valueNum;
+    //           }
+    //         } catch (error) {
+    //           // NOTE: Ignore error
+    //           console.log(error);
+    //         }
+    //         return 0;
+    //       };
+
+    //       const delayBeforeLoopMs = getDelayFromLocalStorage() || 1000;
+    //       setTimeout(() => {
+    //         playNext();
+    //       }, delayBeforeLoopMs);
+    //     } else {
+    //       playNext();
+    //     }
+    //   });
+
+    //   timeline.eventCallback('onStart', () => {
+    //     this.playerService.activeSlide.set(slides[i]);
+    //     if (i === 0) {
+    //       this.legacyService.logInitMessage(
+    //         Boolean(this.playerState.dataJson()),
+    //       );
+
+    //       const lastSlide = slides[slides.length - 1];
+    //       const lastSlideElement = this.getSlideElementBySlide(lastSlide);
+    //       gsap.set(lastSlideElement, { display: 'none' });
+    //     }
+    //   });
+    // });
+
+    // slideTimelines[0].play();
   }
 
   private getSlideAnimation(
