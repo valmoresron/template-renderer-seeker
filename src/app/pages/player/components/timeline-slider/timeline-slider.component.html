@@ -1,1 +1,17 @@
-
+<div class="slider-container">
+  <div class="control">
+    <button (click)="onTogglePause(); paused.set(!paused())">
+      <span>{{ paused() ? 'Play' : 'Pause' }}</span>
+    </button>
+    <input
+      (mouseover)="pauseTick.set(true)"
+      (mouseleave)="pauseTick.set(false)"
+      type="range"
+      [max]="duration()"
+      [value]="currentTime()"
+      (change)="onSeek($event)"
+      step="0.001"
+    />
+    <div>{{ currentTimeStr$ | async }} / {{ durationStr() }}</div>
+  </div>
+</div>

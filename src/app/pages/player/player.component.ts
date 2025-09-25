@@ -91,16 +91,9 @@ export class PlayerComponent {
       cumulativeDuration += slides[i].properties.duration;
     }
 
-    setTimeout(() => {
-      masterTimeline.play();
-      masterTimeline.repeat(-1);
-    }, 3000);
-
+    masterTimeline.repeat(-1);
+    masterTimeline.play();
     this.masterTimeline.set(masterTimeline);
-
-    (window as unknown as { xx: (num: number) => void }).xx = (num) => {
-      masterTimeline.seek(num);
-    };
 
     // let index = 0;
     // slideTimelines.forEach((timeline, i) => {
