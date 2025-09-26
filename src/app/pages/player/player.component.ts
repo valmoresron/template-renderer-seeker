@@ -43,11 +43,7 @@ export class PlayerComponent {
     Boolean(this.layerComponents().length),
   );
 
-  readonly slides = computed(() => {
-    const scaled = this.playerState.builderDataScaled();
-    const original = this.playerState.builderData();
-    return scaled ?? original;
-  });
+  readonly slides = this.playerState.slides;
 
   readonly masterTimeline = this.timelineService.masterTimeline;
 

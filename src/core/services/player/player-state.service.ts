@@ -55,6 +55,12 @@ export class PlayerStateService {
 
   readonly builderDataScaled = computed(() => this.getBuilderDataScaled());
 
+  readonly slides = computed(() => {
+    const scaled = this.builderDataScaled();
+    const original = this.builderData();
+    return scaled ?? original;
+  });
+
   // -------- FUNCTIONS ------------- //
 
   private getContentJson(contentJs?: string): ContentJson | undefined {

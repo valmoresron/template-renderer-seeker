@@ -18,6 +18,7 @@ import { PlayerStateService } from 'src/core/services/player/player-state.servic
 import { BlankComponent } from '../blank/blank.component';
 import { BlankType } from '../blank/models/blank-type.model';
 import { TimelineService } from 'src/core/services/timeline/timeline.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   imports: [SetSrcDirective, ForcePlayDirective, BlankComponent],
@@ -40,6 +41,8 @@ export class LayerVideoComponent implements ILayerComponent {
       slide.layers.some((l) => l === this.layer()),
     ),
   );
+  readonly activeSlide = this.playerService.activeSlide;
+  readonly isActiveSlide = computed(() => this.slide() === this.activeSlide());
 
   readonly resolution = inject(ResolutionService).resolution;
   readonly objectFit = computed(() => this.getObjectFit());
@@ -51,8 +54,7 @@ export class LayerVideoComponent implements ILayerComponent {
 
   constructor() {
     effect(() => {
-      const activeSlide = this.playerService.activeSlide();
-      const isActiveSlide = this.slide() === activeSlide;
+      const isActiveSlide = this.isActiveSlide();
       const video = this.video();
       if (isActiveSlide && video) {
         video.nativeElement.currentTime = 0;
@@ -66,6 +68,38 @@ export class LayerVideoComponent implements ILayerComponent {
         this.video()?.nativeElement.play();
       }
     });
+
+    this.timelineService.gsapTick$
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.onGsapTick());
+  }
+
+  private onGsapTick(): void {
+    const isActiveSlide = this.isActiveSlide();
+    const video = this.video()?.nativeElement;
+
+    if (!isActiveSlide || !video) return;
+
+    const masterTime = this.timelineService.masterTimeline()?.time() ?? 0;
+    const slide = this.slide();
+    const slides = this.playerState.slides()!;
+    const slideIndex = slides.findIndex((slide_) => slide_ === slide);
+    const prevSlides = slides.slice(0, slideIndex);
+    const prevSlidesTotalTime =
+      prevSlides.reduce(
+        (totalTimeMs_, slide) => totalTimeMs_ + slide.properties.duration,
+        0,
+      ) / 1000; // Seconds
+
+    const videoCurrentTime = video.currentTime ?? 0;
+    const videoSyncedTime = (masterTime - prevSlidesTotalTime) % video.duration;
+    const allowableTimeGap = 0.1;
+    const outOfSync =
+      Math.abs(videoCurrentTime - videoSyncedTime) > allowableTimeGap;
+
+    if (outOfSync) {
+      video.currentTime = videoSyncedTime;
+    }
   }
 
   private getObjectFit(): string {
