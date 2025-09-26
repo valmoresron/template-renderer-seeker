@@ -1,9 +1,7 @@
 import {
   Component,
   computed,
-  DestroyRef,
   effect,
-  ElementRef,
   inject,
   signal,
   viewChildren,
@@ -12,13 +10,13 @@ import { PlayerStateService } from '../../../core/services/player/player-state.s
 import { SlideComponent } from './components/slide/slide.component';
 import { LayerComponent } from './components/layer/layer.component';
 import { LayerService } from 'src/core/services/layer/layer.service';
-import gsap from 'gsap';
 import { Layer } from 'src/core/models/renderer/slide/layer/layer.model';
 import { ReversePipe } from 'src/core/pipes/reverse/reverse.pipe';
 import { Slide } from 'src/core/models/renderer/slide/slide.model';
 import { LegacyService } from 'src/core/services/legacy/legacy.service';
-import { PlayerService } from 'src/core/services/player/player.service';
 import { TimelineSliderComponent } from './components/timeline-slider/timeline-slider.component';
+import { MasterTimelineService } from 'src/core/services/master-timeline/master-timeline.service';
+import gsap from 'gsap';
 
 @Component({
   imports: [
@@ -32,11 +30,10 @@ import { TimelineSliderComponent } from './components/timeline-slider/timeline-s
   styleUrl: './player.component.scss',
 })
 export class PlayerComponent {
-  private readonly playerService = inject(PlayerService);
   private readonly playerState = inject(PlayerStateService);
   private readonly layerService = inject(LayerService);
+  private readonly masterTimelineService = inject(MasterTimelineService);
   private readonly legacyService = inject(LegacyService);
-  private readonly destroyRef = inject(DestroyRef);
 
   private readonly slideComponents = viewChildren(SlideComponent);
   private readonly layerComponents = viewChildren(LayerComponent);
@@ -51,7 +48,7 @@ export class PlayerComponent {
     return scaled ?? original;
   });
 
-  readonly masterTimeline = signal<gsap.core.Timeline | null>(null);
+  readonly masterTimeline = this.masterTimelineService.masterTimeline;
 
   constructor() {
     const readyRef = effect(() => {
@@ -82,13 +79,25 @@ export class PlayerComponent {
     }
 
     const masterTimeline = gsap.timeline({ paused: true });
+    const hasDataJson = Boolean(this.playerState.dataJson());
     let cumulativeDuration = 0;
     for (const [i, slideTimeline] of slideTimelines.entries()) {
       masterTimeline.add(slideTimeline, cumulativeDuration / 1000);
-      console.log(cumulativeDuration);
       slideTimeline.play();
-
       cumulativeDuration += slides[i].properties.duration;
+
+      // Add event listeners
+      const first = i === 0;
+      const last = i === slideTimelines.length - 1;
+      slideTimeline.eventCallback('onStart', () => {
+        if (first) {
+          this.legacyService.logInitMessage(hasDataJson);
+        }
+      });
+      slideTimeline.eventCallback('onComplete', () => {
+        this.legacyService.logEndSlideMessage();
+        if (last) this.legacyService.logEndTemplateMessage();
+      });
     }
 
     masterTimeline.repeat(-1);
