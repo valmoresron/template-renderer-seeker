@@ -13,6 +13,7 @@ import gsap from 'gsap';
 import { SetSrcDirective } from 'src/core/directives/set-src/set-src.directive';
 import { ForcePlayDirective } from 'src/core/directives/force-play/force-play.directive';
 import { PlayerService } from 'src/core/services/player/player.service';
+import { ResolutionService } from 'src/core/services/resolution/resolution.service';
 
 @Component({
   imports: [SetSrcDirective, ForcePlayDirective],
@@ -21,11 +22,16 @@ import { PlayerService } from 'src/core/services/player/player.service';
   styleUrl: './slide.component.scss',
 })
 export class SlideComponent implements ISlideComponent {
-  private playerService = inject(PlayerService);
+  private readonly playerService = inject(PlayerService);
+  private readonly resolutionService = inject(ResolutionService);
+
   readonly video = viewChild<ElementRef<HTMLVideoElement>>('video');
 
   readonly slide = input.required<Slide>();
   readonly slideElement = viewChild<ElementRef<HTMLDivElement>>('slideElement');
+  readonly isActiveSlide = computed(
+    () => this.slide() === this.playerService.activeSlide(),
+  );
 
   readonly backgroundType = computed(
     () => this.slide().properties.backgroundType,
@@ -37,6 +43,8 @@ export class SlideComponent implements ISlideComponent {
     () => this.slide().properties.backgroundVideo?.url,
   );
 
+  readonly resolution = this.resolutionService.resolution;
+
   constructor() {
     const ref = effect(() => {
       this.setBackground();
@@ -44,8 +52,7 @@ export class SlideComponent implements ISlideComponent {
     });
 
     effect(() => {
-      const activeSlide = this.playerService.activeSlide();
-      const isActiveSlide = this.slide() === activeSlide;
+      const isActiveSlide = this.isActiveSlide();
       const video = this.video();
       if (isActiveSlide && video) {
         video.nativeElement.currentTime = 0;
