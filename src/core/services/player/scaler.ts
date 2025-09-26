@@ -178,7 +178,6 @@ function scaleBuilderData(
         slide.layers[i] = scaledLayer;
       }
     }
-    return;
   }
 }
 
