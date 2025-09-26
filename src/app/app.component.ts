@@ -1,8 +1,16 @@
-import { Component, effect, inject, signal } from '@angular/core';
+import {
+  Component,
+  effect,
+  ElementRef,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { PlayerStateService } from '../core/services/player/player-state.service';
 import { UnsupportedResolutionComponent } from './pages/unsupported-resolution/unsupported-resolution.component';
 import { PlayerComponent } from './pages/player/player.component';
 import { ResolutionService } from 'src/core/services/resolution/resolution.service';
+import { ZoneService } from 'src/core/services/zone/zone.service';
 
 @Component({
   imports: [PlayerComponent, UnsupportedResolutionComponent],
@@ -11,8 +19,12 @@ import { ResolutionService } from 'src/core/services/resolution/resolution.servi
   styleUrl: './app.component.scss',
 })
 export class AppComponent {
+  private readonly mainViewport =
+    viewChild<ElementRef<HTMLDivElement>>('mainViewport');
+
   private readonly playerState = inject(PlayerStateService);
   private readonly resolutionService = inject(ResolutionService);
+  private readonly zoneService = inject(ZoneService);
 
   readonly render = signal(true);
   readonly isLoading = this.playerState.loadingData;
@@ -30,6 +42,12 @@ export class AppComponent {
         setTimeout(() => {
           this.render.set(true);
         }, 100);
+      }
+    });
+
+    effect(() => {
+      if (this.mainViewport()?.nativeElement) {
+        this.zoneService.mainViewport.set(this.mainViewport()!.nativeElement);
       }
     });
   }
