@@ -3,7 +3,6 @@ import {
   computed,
   effect,
   inject,
-  signal,
   viewChildren,
 } from '@angular/core';
 import { PlayerStateService } from '../../../core/services/player/player-state.service';
@@ -15,8 +14,9 @@ import { ReversePipe } from 'src/core/pipes/reverse/reverse.pipe';
 import { Slide } from 'src/core/models/renderer/slide/slide.model';
 import { LegacyService } from 'src/core/services/legacy/legacy.service';
 import { TimelineSliderComponent } from './components/timeline-slider/timeline-slider.component';
-import { MasterTimelineService } from 'src/core/services/master-timeline/master-timeline.service';
+import { TimelineService } from 'src/core/services/timeline/timeline.service';
 import gsap from 'gsap';
+import { PlayerService } from 'src/core/services/player/player.service';
 
 @Component({
   imports: [
@@ -31,8 +31,9 @@ import gsap from 'gsap';
 })
 export class PlayerComponent {
   private readonly playerState = inject(PlayerStateService);
+  private readonly playerService = inject(PlayerService);
   private readonly layerService = inject(LayerService);
-  private readonly masterTimelineService = inject(MasterTimelineService);
+  private readonly timelineService = inject(TimelineService);
   private readonly legacyService = inject(LegacyService);
 
   private readonly slideComponents = viewChildren(SlideComponent);
@@ -48,7 +49,7 @@ export class PlayerComponent {
     return scaled ?? original;
   });
 
-  readonly masterTimeline = this.masterTimelineService.masterTimeline;
+  readonly masterTimeline = this.timelineService.masterTimeline;
 
   constructor() {
     const readyRef = effect(() => {
@@ -86,10 +87,11 @@ export class PlayerComponent {
       slideTimeline.play();
       cumulativeDuration += slides[i].properties.duration;
 
-      // Add event listeners
+      // --- Setup event listeners --- //
       const first = i === 0;
       const last = i === slideTimelines.length - 1;
       slideTimeline.eventCallback('onStart', () => {
+        this.playerService.activeSlide.set(slides[i]);
         if (first) {
           this.legacyService.logInitMessage(hasDataJson);
         }
@@ -98,11 +100,13 @@ export class PlayerComponent {
         this.legacyService.logEndSlideMessage();
         if (last) this.legacyService.logEndTemplateMessage();
       });
+      // --- ********************** --- //
     }
 
     masterTimeline.repeat(-1);
     masterTimeline.play();
     this.masterTimeline.set(masterTimeline);
+    this.timelineService.slideTimelines.set(slideTimelines);
 
     // let index = 0;
     // slideTimelines.forEach((timeline, i) => {
