@@ -1,21 +1,19 @@
-<div [hidden]="!isActiveSlide()" class="fullscreen irrelevant-area">
-  <div
-    #slideElement
-    class="slide"
-    [class.checkerboard]="checkerBoardBackground()"
-    [style.width]="resolution().width + 'px'"
-    [style.height]="resolution().height + 'px'"
-  >
-    @if (backgroundType() === 'video') {
-    <video
-      #video
-      [setSrc]="videoSrc() ?? ''"
-      [loop]="true"
-      [muted]="true"
-      [forcePlay]="true"
-    ></video>
-    }
+<div
+  #slideElement
+  class="slide"
+  [class.checkerboard]="checkerBoardBackground()"
+  [style.width]="resolution().width + 'px'"
+  [style.height]="resolution().height + 'px'"
+>
+  @if (backgroundType() === 'video') {
+  <video
+    #video
+    [setSrc]="videoSrc() ?? ''"
+    [loop]="true"
+    [muted]="true"
+    [forcePlay]="true"
+  ></video>
+  }
 
-    <ng-content></ng-content>
-  </div>
+  <ng-content></ng-content>
 </div>
