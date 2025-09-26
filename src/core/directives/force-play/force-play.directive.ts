@@ -29,8 +29,10 @@ export class ForcePlayDirective {
         clearInterval(watchdogInterval);
       }
 
-      if (typeof this.forcePlay === 'boolean') {
-        if (this.forcePlay) ensurePlaying();
+      if (typeof this.forcePlay() === 'boolean') {
+        if (this.forcePlay()) {
+          ensurePlaying();
+        }
       } else {
         ensurePlaying();
       }

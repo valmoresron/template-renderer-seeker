@@ -7,7 +7,7 @@
     [disablePictureInPicture]="true"
     [muted]="true"
     [loop]="true"
-    [forcePlay]="true"
+    [forcePlay]="!paused()"
   ></video>
   } @else {
   <app-blank [blankType]="blankType()"></app-blank>

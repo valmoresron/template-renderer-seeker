@@ -17,6 +17,7 @@ import { ForcePlayDirective } from 'src/core/directives/force-play/force-play.di
 import { PlayerStateService } from 'src/core/services/player/player-state.service';
 import { BlankComponent } from '../blank/blank.component';
 import { BlankType } from '../blank/models/blank-type.model';
+import { TimelineService } from 'src/core/services/timeline/timeline.service';
 
 @Component({
   imports: [SetSrcDirective, ForcePlayDirective, BlankComponent],
@@ -25,11 +26,12 @@ import { BlankType } from '../blank/models/blank-type.model';
   styleUrl: './layer-video.component.scss',
 })
 export class LayerVideoComponent implements ILayerComponent {
-  private playerService = inject(PlayerService);
-  private playerState = inject(PlayerStateService);
-  readonly video = viewChild<ElementRef<HTMLVideoElement>>('video');
+  private readonly playerService = inject(PlayerService);
+  private readonly playerState = inject(PlayerStateService);
+  private readonly timelineService = inject(TimelineService);
 
-  private slides = this.playerState.builderData;
+  readonly video = viewChild<ElementRef<HTMLVideoElement>>('video');
+  private readonly slides = this.playerState.builderData;
 
   readonly element = viewChild<ElementRef<HTMLDivElement>>('element');
   readonly layer = input.required<VideoLayer>();
@@ -45,6 +47,8 @@ export class LayerVideoComponent implements ILayerComponent {
   readonly isBlankSrc = computed(() => this.src() === 'blank-video.mp4');
   readonly blankType = signal(BlankType.Video).asReadonly();
 
+  readonly paused = this.timelineService.paused;
+
   constructor() {
     effect(() => {
       const activeSlide = this.playerService.activeSlide();
@@ -52,6 +56,14 @@ export class LayerVideoComponent implements ILayerComponent {
       const video = this.video();
       if (isActiveSlide && video) {
         video.nativeElement.currentTime = 0;
+      }
+    });
+
+    effect(() => {
+      if (this.paused()) {
+        this.video()?.nativeElement.pause();
+      } else {
+        this.video()?.nativeElement.play();
       }
     });
   }
