@@ -59,14 +59,14 @@ export class TimelineSliderComponent implements OnInit, OnDestroy {
     const target = event.target as HTMLInputElement;
     const value = target.value;
     const valueNum = parseFloat(value);
-    this.timeline().seek(valueNum);
+    this.timelineService.seek(valueNum);
   }
 
   onTogglePause(): void {
     if (this.paused()) {
-      this.timeline().play();
+      this.timelineService.play();
     } else {
-      this.timeline().pause();
+      this.timelineService.pause();
     }
   }
 
