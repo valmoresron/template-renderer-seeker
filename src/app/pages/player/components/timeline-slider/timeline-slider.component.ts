@@ -1,5 +1,12 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  HostListener,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { distinctUntilChanged } from 'rxjs';
 import { TimelineService } from 'src/core/services/timeline/timeline.service';
@@ -11,6 +18,11 @@ import { TimelineService } from 'src/core/services/timeline/timeline.service';
   styleUrl: './timeline-slider.component.scss',
 })
 export class TimelineSliderComponent {
+  @HostListener('window:keydown.space')
+  onSpaceClick(): void {
+    this.onTogglePause();
+  }
+
   private readonly timelineService = inject(TimelineService);
 
   readonly timeline = computed(() => this.timelineService.masterTimeline()!);
