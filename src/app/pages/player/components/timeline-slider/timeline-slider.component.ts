@@ -1,15 +1,6 @@
 import { AsyncPipe } from '@angular/common';
-import {
-  Component,
-  computed,
-  inject,
-  input,
-  OnDestroy,
-  OnInit,
-  signal,
-} from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import gsap from 'gsap';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { distinctUntilChanged } from 'rxjs';
 import { TimelineService } from 'src/core/services/timeline/timeline.service';
 
@@ -19,7 +10,7 @@ import { TimelineService } from 'src/core/services/timeline/timeline.service';
   templateUrl: './timeline-slider.component.html',
   styleUrl: './timeline-slider.component.scss',
 })
-export class TimelineSliderComponent implements OnInit, OnDestroy {
+export class TimelineSliderComponent {
   private readonly timelineService = inject(TimelineService);
 
   readonly timeline = computed(() => this.timelineService.masterTimeline()!);
@@ -35,12 +26,10 @@ export class TimelineSliderComponent implements OnInit, OnDestroy {
 
   readonly durationStr = computed(() => this.formatColonTime(this.duration()));
 
-  private gsapTickCallback: (() => void) | null = null;
-
-  ngOnInit(): void {
-    const callback = () => this.onGsapTick();
-    gsap.ticker.add(callback);
-    this.gsapTickCallback = callback;
+  constructor() {
+    this.timelineService.gsapTick$
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.onGsapTick());
   }
 
   private onGsapTick(): void {
@@ -81,12 +70,6 @@ export class TimelineSliderComponent implements OnInit, OnDestroy {
       return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
     } else {
       return `${pad(mins)}:${pad(secs)}`;
-    }
-  }
-
-  ngOnDestroy(): void {
-    if (this.gsapTickCallback) {
-      gsap.ticker.remove(this.gsapTickCallback);
     }
   }
 }
