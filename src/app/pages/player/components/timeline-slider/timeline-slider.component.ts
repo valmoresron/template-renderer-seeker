@@ -19,8 +19,23 @@ import { TimelineService } from 'src/core/services/timeline/timeline.service';
 })
 export class TimelineSliderComponent {
   @HostListener('window:keydown.space')
-  onSpaceClick(): void {
+  onSpacebar(): void {
     this.onTogglePause();
+  }
+
+  @HostListener('window:keydown.arrowLeft')
+  onLeftArrow(): void {
+    const currentTime = this.timeline().time();
+    const backwardTime = Math.max(0, currentTime - 5);
+    this.timelineService.seek(backwardTime);
+  }
+
+  @HostListener('window:keydown.arrowRight')
+  onRightArrow(): void {
+    const duration = this.timeline().duration();
+    const currentTime = this.timeline().time();
+    const forwardTime = Math.min(duration - 1, currentTime + 5);
+    this.timelineService.seek(forwardTime);
   }
 
   private readonly timelineService = inject(TimelineService);
