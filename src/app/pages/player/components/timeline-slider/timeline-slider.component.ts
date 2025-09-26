@@ -2,6 +2,7 @@ import { AsyncPipe } from '@angular/common';
 import {
   Component,
   computed,
+  inject,
   input,
   OnDestroy,
   OnInit,
@@ -10,6 +11,7 @@ import {
 import { toObservable } from '@angular/core/rxjs-interop';
 import gsap from 'gsap';
 import { distinctUntilChanged } from 'rxjs';
+import { TimelineService } from 'src/core/services/timeline/timeline.service';
 
 @Component({
   imports: [AsyncPipe],
@@ -18,7 +20,9 @@ import { distinctUntilChanged } from 'rxjs';
   styleUrl: './timeline-slider.component.scss',
 })
 export class TimelineSliderComponent implements OnInit, OnDestroy {
-  readonly timeline = input.required<gsap.core.Timeline>();
+  private readonly timelineService = inject(TimelineService);
+
+  readonly timeline = computed(() => this.timelineService.masterTimeline()!);
 
   readonly duration = computed(() => this.timeline().duration());
   readonly currentTime = signal<number>(0);
