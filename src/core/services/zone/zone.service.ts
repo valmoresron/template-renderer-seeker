@@ -8,7 +8,7 @@ export class ZoneService {
   readonly mainViewport = signal<HTMLDivElement | null>(null);
 
   readonly zoneResolution = signal<Resolution | null>({
-    width: 1920,
-    height: 1080,
+    width: 5400,
+    height: 1920,
   });
 }

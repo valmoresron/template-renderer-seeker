@@ -93,7 +93,14 @@ export class LayerService {
       }
 
       const duration = (timeframes[i] - timeframes[i - 1]) / 1000;
-      timeline.to(element, { ...properties, duration });
+
+      const isDelayed = i === 0 && timeframes.length > 1 && timeframes[i] !== 0;
+      if (isDelayed) {
+        const delay = timeframes[i] / 1000;
+        timeline.to(element, { ...properties, duration, delay });
+      } else {
+        timeline.to(element, { ...properties, duration });
+      }
 
       if (!animate) break;
     }
