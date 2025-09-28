@@ -26,7 +26,7 @@ export class TimelineSliderComponent {
   @HostListener('window:keydown.arrowLeft')
   onLeftArrow(): void {
     const currentTime = this.timeline().time();
-    const backwardTime = Math.max(0, currentTime - 5);
+    const backwardTime = Math.max(0, currentTime - 2);
     this.timelineService.seek(backwardTime);
   }
 
@@ -34,7 +34,7 @@ export class TimelineSliderComponent {
   onRightArrow(): void {
     const duration = this.timeline().duration();
     const currentTime = this.timeline().time();
-    const forwardTime = Math.min(duration - 1, currentTime + 5);
+    const forwardTime = Math.min(duration - 1, currentTime + 2);
     this.timelineService.seek(forwardTime);
   }
 
